@@ -1,7 +1,8 @@
 var express = require('express');
+var bodyParser = require('body-parser');
 var tungus = require('tungus');
 var mongoose = require('mongoose');
-var bodyParser = require('body-parser');
+var request = require('request');
 var Cards = require('./models/cards');
 
 mongoose.connect('tingodb://'+__dirname+'/skywards');
@@ -64,6 +65,33 @@ cardRoute.delete(function(req, res) {
       res.send(err);
 
     res.json({ message: 'Card removed' });
+  });
+});
+
+var momentsRoute = router.route('/moments');
+
+momentsRoute.get(function(req, res) {
+  var token = process.env.IONIC_TOKEN;
+
+  var options = {
+    "url": "https://api.ionic.io/push/notifications",
+    "headers": {
+      "Authorization": "Bearer " + token
+    },
+    "json": true,
+    "body": {
+      "user_ids": ["6b5edfb7-b1b0-4d36-9774-25aaf74dab0e"],
+      "profile": "skywardsprime",
+      "notification": {
+        "title": "Enjoy a Moment on us",
+        "message": "You''re near a Starbucks. Click to enjoy a coffee, courtesy of Skywards Prime"
+      }
+    }
+  };
+
+  request.post(options, function(err, response, body) {
+    console.log(body);
+    res.json({ message: 'Moment notification was enqueued' });
   });
 });
 
